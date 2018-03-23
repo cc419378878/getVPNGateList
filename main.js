@@ -21,7 +21,7 @@ function getJson(urls, flags) {
       response: 10000,
       deadline: 10000,
     })
-    .end(function(error, res) {
+    .end((error, res) => {
       if(error) {
         console.log(`can't connect ${url}!`);
         i < len ? getJson(urls, flags) : console.log(`can't connect all urls!`);
@@ -46,11 +46,19 @@ function pushGithub() {
   const push = `git push origin master`;
 
   // 如果iphone有改变再执行其他命令
-
+  exec(diff, (err, stdout, stderr) => {
+    console.log(!stdout);
+    console.log(stderr);
+    if(!stdout) {
+      exec(add);
+      exec(commit);
+      exec(push);
+    }
+  })
 }
 
-getJson(test_urls, flags);
-
+// getJson(test_urls, flags);
+pushGithub();
 
 //定时任务
 // schedule.scheduleJob('16 * * * * *', function(){

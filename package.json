@@ -9,6 +9,8 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "request": "^2.85.0"
-  }
+    "node-schedule": "^1.3.0",
+    "superagent": "^3.8.2"
+  },
+  "devDependencies": {}
 }
