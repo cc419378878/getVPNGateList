@@ -31,6 +31,7 @@ function getJson(urls, flags) {
         fs.writeFile('./api/iphone', JSON.stringify(res.text), (err) => {
           if (err) throw err;
           console.log('The file has been saved!');
+          pushGithub();
         });
         console.log(`${url} is connected now!`);
       }
@@ -57,8 +58,8 @@ function pushGithub() {
   })
 }
 
-// getJson(test_urls, flags);
-pushGithub();
+getJson(urls, flags);
+
 
 //定时任务
 // schedule.scheduleJob('16 * * * * *', function(){
