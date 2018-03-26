@@ -1,4 +1,4 @@
-const exec = require('child_process').exec;
+const { exec, spawn } = require('child_process');
 const config = require('./config');
 
 // const test_urls = ['https://www.google.com/', 'https://www.youtube.com/', 'https://www.baidu.com/'];
@@ -15,10 +15,10 @@ function getJson(urls, flags) {
   let url = urls[i];
 
   exec(`wget --output-document='./api/iphone' --tries=2 --timeout=5 ${url}`, (err, stdout, stderr) => {
-    if(err) {
+    if (err) {
       console.log(`Can't connect ${url}!`);
       flags.i++;
-      if(flags.i < len) {
+      if (flags.i < len) {
         getJson(urls, flags);
       } else {
         console.log('All connect deny!');
@@ -36,25 +36,34 @@ function getJson(urls, flags) {
 function pushGithub() {
   const commitMsg = `更新于${new Date()}`;
   const iphone = './api/iphone';
-  const diff = `git diff ${iphone}`;
   const add = `git add ${iphone}`;
-  const commit = `git commit -m ${commitMsg}`;
+  const commit = `git commit -m '${commitMsg}'`;
   const push = `git push origin master`;
 
   // 如果iphone有改变再执行其他命令
-  exec(diff, (err, stdout, stderr) => {
-    if (err){
-      console.log(err);
-      return;
-    }
-    console.log(stdout);
-    console.log(stderr);
-    if(!stdout) {
+  let diff = spawn('git', ['diff', iphone]);
+  diff.stdout.on('data', (data) => {
+    console.log(!!data);
+    if (!!data) {
       exec(add);
-      exec(commit);
-      exec(push);
+      exec(commit, ((err, stdout, stderr) => {
+        if(err) {
+          console.log(`# git commit is err #: ${err}!`);
+          return;
+        }
+        console.log(`# git commit stdout #: ${stdout}!`);
+      }));
+      exec(push, ((err, stdout, stderr) => {
+        if(err) {
+          console.log(`# git push is err #: ${err}!`);
+          return;
+        }
+        console.log(`git push stdout: ${stdout}!`);
+      }));
     }
-  })
+    // console.log(`data from child  ${data}`);
+  });
+
 }
 
 
