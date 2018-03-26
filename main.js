@@ -24,7 +24,7 @@ function getJson(urls, flags) {
         console.log('All connect deny!');
       }
     } else {
-     // pushGithub();
+     pushGithub();
       console.log('Success!');
     }
     console.log(`stdout is: ${stdout}`);
