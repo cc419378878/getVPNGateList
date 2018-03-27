@@ -1,7 +1,7 @@
 const { exec, spawn } = require('child_process');
 const config = require('./config');
 
-// const test_urls = ['https://www.google.com/', 'https://www.youtube.com/', 'https://www.baidu.com/'];
+// const test_urls = ['http://www.163.com/', 'http://www.youtube.com/', 'http://www.baidu.com/'];
 const urls = [].concat(config.site.main, config.site.mirrors);
 const flags = {
   i: 0
@@ -25,10 +25,10 @@ function getJson(urls, flags) {
       }
     } else {
       pushGithub();
-      console.log('Success!');
+      console.log('connect Success!');
     }
-    console.log(`stdout is: ${stdout}`);
-    console.log(`stdout is: ${stderr}`);
+    // console.log(`stdout is: ${stdout}`);
+    // console.log(`stdout is: ${stderr}`);
   });
 
 }
@@ -41,10 +41,22 @@ function pushGithub() {
   const push = `git push origin master`;
 
   // 如果iphone有改变再执行其他命令
-  let diff = spawn('git', ['diff', iphone]);
+  const diff = spawn('git', ['diff', iphone],{ stdio: ['inherit', 'pipe', 'pipe'] });
+  const stdOut = [];
+  const stdErr = [];
+
   diff.stdout.on('data', (data) => {
-    console.log(!!data);
-    if (!!data) {
+    stdOut.push(data.toString('utf8'));
+  });
+
+  diff.stderr.on('data', (data) => {
+    stdErr.push(data.toString('utf8'));
+  });
+
+  diff.on('close', () => {
+    console.log('close');
+    console.log(`stdOut is ${!!stdOut.length} and stdErr is ${!stdErr.length}`);
+    if(!stdErr.length && !!stdOut.length) {
       exec(add);
       exec(commit, ((err, stdout, stderr) => {
         if(err) {
@@ -58,13 +70,14 @@ function pushGithub() {
           console.log(`# git push is err #: ${err}!`);
           return;
         }
-        console.log(`git push stdout: ${stdout}!`);
+        console.log(`# git push stdout #: ${stdout}!`);
+        console.log(`# git push stderr #: ${stderr}!`);
       }));
+    } else {
+      console.log('文件没有更新内容！');
     }
-    // console.log(`data from child  ${data}`);
   });
-
 }
 
-
 getJson(new_urls, flags);
+// pushGithub();
