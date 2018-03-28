@@ -25,7 +25,7 @@ function getJson(urls, flags) {
       }
     } else {
       pushGithub();
-      console.log('connect Success!');
+      console.log(`Connect ${url} Success!`);
     }
     // console.log(`stdout is: ${stdout}`);
     // console.log(`stdout is: ${stderr}`);
@@ -54,25 +54,31 @@ function pushGithub() {
   });
 
   diff.on('close', () => {
-    console.log('close');
-    console.log(`stdOut is ${!!stdOut.length} and stdErr is ${!stdErr.length}`);
+    // console.log(`stdOut is ${!!stdOut.length} and stdErr is ${!stdErr.length}`);
     if(!stdErr.length && !!stdOut.length) {
-      exec(add);
-      exec(commit, ((err, stdout, stderr) => {
+      exec(add, (err, stdout, stderr) => {
         if(err) {
-          console.log(`# git commit is err #: ${err}!`);
+          console.error(`# git add is err #: ${err}!`);
           return;
         }
-        console.log(`# git commit stdout #: ${stdout}!`);
-      }));
-      exec(push, ((err, stdout, stderr) => {
-        if(err) {
-          console.log(`# git push is err #: ${err}!`);
-          return;
-        }
-        console.log(`# git push stdout #: ${stdout}!`);
-        console.log(`# git push stderr #: ${stderr}!`);
-      }));
+        // console.log(`# git add stdout #: ${stdout}!`);
+        exec(commit, ((err, stdout, stderr) => {
+          if(err) {
+            console.error(`# git commit is err #: ${err}!`);
+            return;
+          }
+          if(stdout) console.log(`# git commit stdout #: ${stdout}!`);
+          if(stderr) console.warn(`# git commit stderr #: ${stderr}!`);
+          exec(push, ((err, stdout, stderr) => {
+            if(err) {
+              console.error(`# git push is err #: ${err}!`);
+              return;
+            }
+            if(stdout) console.log(`# git push stdout #: ${stdout}!`);
+            if(stderr) console.warn(`# git push stderr #: ${stderr}!`);
+          }));
+        }));
+      });
     } else {
       console.log('文件没有更新内容！');
     }
